@@ -8,7 +8,7 @@ list_ticket_types = ['', 'VIP', 'General Admission']
 conn = st.connection("postgresql", type="sql", 
                      url="postgresql://linomanusia:q7meCLNZvw4P@ep-wandering-boat-05196099.us-east-2.aws.neon.tech/etsets")
 
-st.header('TAYLOR SWIFT ERAS TOUR TICKET MANAGEMENT')
+st.header('NGAWI MUSICAL WORLD TOUR TICKET MANAGEMENT')
 page = st.sidebar.selectbox("Select Menu", ["View Tickets", "Edit Tickets"])
 
 if page == "View Tickets":
