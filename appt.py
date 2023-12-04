@@ -1,71 +1,61 @@
+# Simpan kode di sini
+
 import streamlit as st
 from sqlalchemy import text
 
-list_doctor = ['', 'dr. Nurita', 'dr. Yogi', 'dr. Wibowo', 'dr. Ulama', 'dr. Ping']
-list_symptom = ['', 'male', 'female']
+list_ticket_types = ['', 'VIP', 'General Admission']
 
 conn = st.connection("postgresql", type="sql", 
-                     url="postgresql://linomanusia:wEvSQAOa2Ir5@ep-lucky-mouse-27717197.us-east-2.aws.neon.tech/web")
-with conn.session as session:
-    query = text('CREATE TABLE IF NOT EXISTS SCHEDULE (id serial, doctor_name varchar, patient_name varchar, gender char(25), \
-                                                       symptom text, handphone varchar, address text, tanggal date);')
-    session.execute(query)
+                     url="postgresql://linomanusia:q7meCLNZvw4P@ep-wandering-boat-05196099.us-east-2.aws.neon.tech/etsets")
 
-st.header('SIMPLE HOSPITAL DATA MANAGEMENT SYS')
-page = st.sidebar.selectbox("Pilih Menu", ["View Data","Edit Data"])
+st.header('TAYLOR SWIFT ERAS TOUR TICKET MANAGEMENT')
+page = st.sidebar.selectbox("Select Menu", ["View Tickets", "Edit Tickets"])
 
-if page == "View Data":
-    data = conn.query('SELECT * FROM schedule ORDER By id;', ttl="0").set_index('id')
+if page == "View Tickets":
+    data = conn.query('SELECT * FROM concert_tickets ORDER BY ticket_id;', ttl="0").set_index('ticket_id')
     st.dataframe(data)
 
-if page == "Edit Data":
-    if st.button('Tambah Data'):
+if page == "Edit Tickets":
+    if st.button('Add Ticket'):
         with conn.session as session:
-            query = text('INSERT INTO schedule (doctor_name, patient_name, gender, symptom, handphone, address, waktu, tanggal) \
-                          VALUES (:1, :2, :3, :4, :5, :6, :7, :8);')
-            session.execute(query, {'1':'', '2':'', '3':'', '4':'[]', '5':'', '6':'', '7':None, '8':None})
+            query = text('INSERT INTO concert_tickets (concert_name, ticket_type, price, buyer_name, email, phone_number, purchase_date) \
+                          VALUES (:1, :2, :3, :4, :5, :6, :7);')
+            session.execute(query, {'1':'Taylor Swift Eras Tour', '2':'', '3':0.0, '4':'', '5':'', '6':'', '7':None})
             session.commit()
 
-    data = conn.query('SELECT * FROM schedule ORDER By id;', ttl="0")
+    data = conn.query('SELECT * FROM concert_tickets ORDER BY ticket_id;', ttl="0")
     for _, result in data.iterrows():        
-        id = result['id']
-        doctor_name_lama = result["doctor_name"]
-        patient_name_lama = result["patient_name"]
-        gender_lama = result["gender"]
-        symptom_lama = result["symptom"]
-        handphone_lama = result["handphone"]
-        address_lama = result["address"]
-        waktu_lama = result["waktu"]
-        tanggal_lama = result["tanggal"]
+        ticket_id = result['ticket_id']
+        concert_name_lama = result["concert_name"]
+        ticket_type_lama = result["ticket_type"]
+        price_lama = result["price"]
+        buyer_name_lama = result["buyer_name"]
+        email_lama = result["email"]
+        phone_number_lama = result["phone_number"]
+        purchase_date_lama = result["purchase_date"]
 
-        with st.expander(f'a.n. {patient_name_lama}'):
-            with st.form(f'data-{id}'):
-                doctor_name_baru = st.selectbox("doctor_name", list_doctor, list_doctor.index(doctor_name_lama))
-                patient_name_baru = st.text_input("patient_name", patient_name_lama)
-                gender_baru = st.selectbox("gender", list_symptom, list_symptom.index(gender_lama))
-                symptom_baru = st.multiselect("symptom", ['cough', 'flu', 'headache', 'stomache'], eval(symptom_lama))
-                handphone_baru = st.text_input("handphone", handphone_lama)
-                address_baru = st.text_input("address", address_lama)
-                waktu_baru = st.time_input("waktu", waktu_lama)
-                tanggal_baru = st.date_input("tanggal", tanggal_lama)
+        with st.expander(f'Ticket ID: {ticket_id}'):
+            with st.form(f'ticket-{ticket_id}'):
+                ticket_type_baru = st.selectbox("Ticket Type", list_ticket_types, list_ticket_types.index(ticket_type_lama))
+                price_baru = st.number_input("Price", value=float(price_lama))
+                buyer_name_baru = st.text_input("Buyer Name", buyer_name_lama)
+                email_baru = st.text_input("Email", email_lama)
+                phone_number_baru = st.text_input("Phone Number", phone_number_lama)
+                purchase_date_baru = st.date_input("Purchase Date", purchase_date_lama)
                 
-                col1, col2 = st.columns([1, 6])
-
-                with col1:
-                    if st.form_submit_button('UPDATE'):
-                        with conn.session as session:
-                            query = text('UPDATE schedule \
-                                          SET doctor_name=:1, patient_name=:2, gender=:3, symptom=:4, \
-                                          handphone=:5, address=:6, waktu=:7, tanggal=:8 \
-                                          WHERE id=:9;')
-                            session.execute(query, {'1':doctor_name_baru, '2':patient_name_baru, '3':gender_baru, '4':str(symptom_baru), 
-                                                    '5':handphone_baru, '6':address_baru, '7':waktu_baru, '8':tanggal_baru, '9':id})
-                            session.commit()
-                            st.experimental_rerun()
+                if st.form_submit_button('Update Ticket'):
+                    with conn.session as session:
+                        query = text('UPDATE concert_tickets \
+                                      SET ticket_type=:1, price=:2, buyer_name=:3, email=:4, phone_number=:5, purchase_date=:6 \
+                                      WHERE ticket_id=:7;')
+                        session.execute(query, {'1':ticket_type_baru, '2':price_baru, '3':buyer_name_baru, '4':email_baru, 
+                                                '5':phone_number_baru, '6':purchase_date_baru, '7':ticket_id})
+                        session.commit()
+                        st.experimental_rerun()
                 
-                with col2:
-                    if st.form_submit_button('DELETE'):
-                        query = text(f'DELETE FROM schedule WHERE id=:1;')
-                        session.execute(query, {'1':id})
+                if st.form_submit_button('Delete Ticket'):
+                    with conn.session as session:
+                        query = text('DELETE FROM concert_tickets WHERE ticket_id=:1;')
+                        session.execute(query, {'1':ticket_id})
                         session.commit()
                         st.experimental_rerun()
